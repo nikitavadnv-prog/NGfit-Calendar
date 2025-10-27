@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "https://esm.sh/react";
-import ReactDOM from "https://esm.sh/react-dom";
+import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
 import { Calendar, momentLocalizer } from "https://esm.sh/react-big-calendar";
 import moment from "https://esm.sh/moment";
 
 const localizer = momentLocalizer(moment);
 
-// 🔒 Токен пока оставляем пустым, для безопасности
+// 🔒 токен Airtable оставь пустым, пока не используешь
 const AIRTABLE_TOKEN = "";
 const BASE_ID = "appaGzhibZGjMYx2a";
 const TABLE_ID = "tblWefEB9Uagm0R3D";
@@ -64,4 +64,6 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+const root = createRoot(document.getElementById("root"));
+root.render(<App />);
+
