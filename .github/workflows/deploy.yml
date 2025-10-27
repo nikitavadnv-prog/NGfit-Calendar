@@ -18,21 +18,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Replace Airtable token in main.js
-        # заменяем плейсхолдер {{AIRTABLE_TOKEN}} на значение секрета
         run: |
           if [ -f main.js ]; then
-            sed -i "s/{{AIRTABLE_TOKEN}}/${{ secrets.AIRTABLE_TOKEN }}/g" main.js
-            echo "Token replacement done"
+            sed -i "s/{{AIRTABLE_TOKEN}}/${{ secrets.VITE_AIRTABLE_TOKEN }}/g" main.js
+            echo "✅ Token replacement done"
           else
-            echo "main.js not found" && exit 1
+            echo "❌ main.js not found" && exit 1
           fi
 
       - name: Prepare public_site folder
         run: |
           mkdir -p public_site
-          # копируем все файлы в папку для публикации
           cp -r ./* public_site/
-          # удаляем внутренние каталоги, которые не нужны в публикации
           rm -rf public_site/.github public_site/.git
 
       - name: Upload artifact for GitHub Pages
