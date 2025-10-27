@@ -5,8 +5,8 @@ import moment from "https://esm.sh/moment";
 
 const localizer = momentLocalizer(moment);
 
-// 🔒 токен Airtable оставь пустым, пока не используешь
-const AIRTABLE_TOKEN = "";
+// ⚠️ Токен берем из переменной окружения (если ты настроишь Actions)
+const AIRTABLE_TOKEN = import.meta.env.VITE_AIRTABLE_TOKEN || "";
 const BASE_ID = "appaGzhibZGjMYx2a";
 const TABLE_ID = "tblWefEB9Uagm0R3D";
 
@@ -16,6 +16,11 @@ function App() {
 
   useEffect(() => {
     async function loadData() {
+      if (!AIRTABLE_TOKEN) {
+        setError("⚠️ Не задан токен Airtable (VITE_AIRTABLE_TOKEN).");
+        return;
+      }
+
       try {
         const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
           headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` },
@@ -66,4 +71,3 @@ function App() {
 
 const root = createRoot(document.getElementById("root"));
 root.render(<App />);
-
