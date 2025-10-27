@@ -5,20 +5,28 @@ import moment from "https://esm.sh/moment";
 
 const localizer = momentLocalizer(moment);
 
-// 🔒 вставь сюда свой токен безопасно
-const AIRTABLE_TOKEN = "patXXXXXXXXXXXX"; // замени на свой токен
+// 🔒 Токен пока оставляем пустым, для безопасности
+const AIRTABLE_TOKEN = "";
 const BASE_ID = "appaGzhibZGjMYx2a";
 const TABLE_ID = "tblWefEB9Uagm0R3D";
 
 function App() {
   const [events, setEvents] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
-      headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    async function loadData() {
+      try {
+        const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+          headers: { Authorization: `Bearer ${AIRTABLE_TOKEN}` },
+        });
+        const data = await res.json();
+
+        if (!data.records) {
+          setError("Не удалось получить записи из Airtable.");
+          return;
+        }
+
         const items = data.records
           .filter((r) => r.fields["Дата"])
           .map((r) => ({
@@ -27,20 +35,31 @@ function App() {
             start: new Date(r.fields["Дата"]),
             end: new Date(r.fields["Дата"]),
           }));
+
         setEvents(items);
-      });
+      } catch (err) {
+        console.error("Ошибка при загрузке данных:", err);
+        setError("Ошибка при загрузке данных из Airtable.");
+      }
+    }
+
+    loadData();
   }, []);
 
   return (
-    <div style={{ height: "90vh", margin: "20px" }}>
-      <h2>📅 NGFit — календарь тренировок</h2>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 700 }}
-      />
+    <div style={{ height: "90vh", margin: "40px", fontFamily: "sans-serif" }}>
+      <h2 style={{ textAlign: "center" }}>📅 NGFit — календарь тренировок</h2>
+      {error ? (
+        <p style={{ color: "red", textAlign: "center" }}>{error}</p>
+      ) : (
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 700 }}
+        />
+      )}
     </div>
   );
 }
