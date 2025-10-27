@@ -1,0 +1,48 @@
+name: Deploy NGfit Calendar
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Replace Airtable token in main.js
+        # заменяем плейсхолдер {{AIRTABLE_TOKEN}} на значение секрета
+        run: |
+          if [ -f main.js ]; then
+            sed -i "s/{{AIRTABLE_TOKEN}}/${{ secrets.AIRTABLE_TOKEN }}/g" main.js
+            echo "Token replacement done"
+          else
+            echo "main.js not found" && exit 1
+          fi
+
+      - name: Prepare public_site folder
+        run: |
+          mkdir -p public_site
+          # копируем все файлы в папку для публикации
+          cp -r ./* public_site/
+          # удаляем внутренние каталоги, которые не нужны в публикации
+          rm -rf public_site/.github public_site/.git
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: public_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
